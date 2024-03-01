@@ -1,10 +1,29 @@
 <!doctype html>
-<title>Address Book</title>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-<div class="page">
-  <h1>Address Book</h1>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
+<html lang="en">
+<head>
+    <title>Fun Survey Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <div class="left-column">
+        <ul>
+            {% for key, value in label_dict.items() %}
+                {%  if key != "Timestamp" %}
+                <li><a href="{{ url_for(key) }}">{{ key }}</a></li>
+                {%  endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="page">
+      {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+      {% block body %}{% endblock %}
+    </div>
 </div>
+
+</body>
+</html>

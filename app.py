@@ -1,94 +1,144 @@
 # -*- coding: utf-8 -*-
 """
-    Flaskr
+    Fun Survey Dashboard
     ~~~~~~
 
-    A microblog example application written as Flask tutorial with
-    Flask and sqlite3.
-
-    :copyright: (c) 2015 by Armin Ronacher.
-    :license: BSD, see LICENSE for more details.
 """
 
 import os
-from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, g, redirect, url_for, render_template, flash
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-
-# create our little application :)
 app = Flask(__name__)
 
-# Load default config and override config from an environment variable
-app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
-    DEBUG=True,
-    SECRET_KEY='development key',
-))
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
-def connect_db():
-    """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
+# survey data url
+url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkK73xD192AdP0jZe6ac9cnVPSeqqbYZmSPnhY2hnY8ANROAOCStRFdvjwFoapv3j2rzMtZ91KXPFm/pub?output=csv"
+
+renamelist = ['Timestamp', 'musicartist', 'height', 'city', 'thirtymin', 'travel', \
+              'likepizza', 'deepdish', 'sport', 'spell', 'hangout', 'talk', \
+              'year', 'quote', 'areacode', 'pets', 'superpower', 'shoes']
+
+# create data frame from url
+df = pd.read_csv(url)
+
+# assign original headers to list
+survey_questions = df.columns.to_list()
+
+# replace with column names easier to work with
+df.columns = renamelist
+
+# drop duplicates
+df = df.drop_duplicates(subset=df.columns[1:])
+df.Timestamp = pd.to_datetime(df.Timestamp)
+
+label_dict = {}
+for i in range(len(renamelist)):
+    label_dict[renamelist[i]] = survey_questions[i]
+
+@app.context_processor
+def inject_vars():
+    return {'label_dict': label_dict}
 
 
-def init_db():
-    """Initializes the database."""
-    db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
 
+def render_count(col_label, horizontal=False):
+    question = col_label
+    qtext = label_dict[question]
+    series = df[question]
 
-@app.cli.command('initdb')
-def initdb_command():
-    """Creates the database tables."""
-    init_db()
-    print('Initialized the database.')
+    # Generate descriptive statistics HTML
+    descrip_stats = series.describe()
+    descrip_df = pd.DataFrame(descrip_stats).transpose()
+    descrip_html = descrip_df.to_html()
 
+    value_counts = series.value_counts(ascending=False)
+    value_counts_df = pd.DataFrame(value_counts).head(10)
+    value_counts_html = value_counts_df.to_html()
 
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
+    # Generate the histogram
+    # plt.figure(figsize=(8, 4))  # Optional, adjust size as needed
+    if horizontal:
+        barchart = sns.countplot(y=series)
+    else:
+        barchart = sns.countplot(x=series)
+    image_path = f'static/images/{question}_plot.png'
+    plt.savefig(image_path)
+    plt.close()
 
+    # Pass the path of the image to the template
+    return render_template('numeric.html', title=question, qtext= qtext, descrip=descrip_html,
+                           value_counts = value_counts_html,
+                           chart_url=url_for('static', filename=f'images/{question}_plot.png'))
 
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
 
 
 @app.route('/')
-def show_entries():
-    sort_selected = request.args.get('sort_selected', None)
-    db = get_db()
+def home():
+    df_descriptives = df.describe().to_html()
+    return render_template('index.html',
+                           label_dict=label_dict,
+                           first=df.Timestamp.min(),
+                           last =df.Timestamp.max(),
+                           responses=df.shape[0])
 
-    ALLOWED_SORT_FIELDS = ['name', 'email', 'phone_number', 'address']
-    entries = []
+@app.route('/musicartist')
+def musicartist():
+    return render_count('musicartist', horizontal=True)
+@app.route('/height')
+def height():
+    return render_count('height', horizontal=True)
+@app.route('/city')
+def city():
+    return render_count('city', horizontal=True)
+@app.route('/thirtymin')
+def thirtymin():
+    return render_count('thirtymin', horizontal=True)
+@app.route('/travel')
+def travel():
+    return render_count('travel', horizontal=True)
 
-    if sort_selected in ALLOWED_SORT_FIELDS:
-        # Safely sorting based on predefined allowed fields
-        query = f'SELECT name, email, phone_number, address FROM entries ORDER BY {sort_selected}'
-        entries = db.execute(query).fetchall()
-    else:
-        # If no sort is specified or it's not allowed, show all entries without sorting
-        entries = db.execute('SELECT name, email, phone_number, address FROM entries').fetchall()
+@app.route('/likepizza')
+def likepizza():
+    return render_count('likepizza', horizontal=False)
 
-    return render_template('show_entries.html', entries=entries)
+@app.route('/deepdish')
+def deepdish():
+    return render_count('deepdish', horizontal=True)
 
-@app.route('/add', methods=['POST'])
-def add_entry():
-    db = get_db()
-    db.execute('insert into entries (name, email, address, phone_number) values (?, ?, ?, ?)',
-               [request.form['name'], request.form['email'], request.form['address'],request.form['phone']])
-    db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+@app.route('/sport')
+def sport():
+    return render_count('sport', horizontal=True)
+@app.route('/spell')
+def spell():
+    return render_count('spell', horizontal=True)
+@app.route('/hangout')
+def hangout():
+    return render_count('hangout', horizontal=True)
+
+@app.route('/talk')
+def talk():
+    return render_count('talk', horizontal=True)
+@app.route('/year')
+def year():
+    return render_count('year', horizontal=True)
+
+@app.route('/quote')
+def quote():
+    return render_count('quote', horizontal=True)
+@app.route('/areacode')
+def areacode():
+    return render_count('areacode', horizontal=True)
+@app.route('/pets')
+def pets():
+    return render_count('pets', horizontal=True)
+@app.route('/superpower')
+def superpower():
+    return render_count('superpower', horizontal=True)
+@app.route('/shoes')
+def shoes():
+    return render_count('shoes', horizontal=True)
 

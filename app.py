@@ -11,6 +11,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 app = Flask(__name__)
 
 
@@ -53,11 +54,11 @@ def render_count(col_label, horizontal=False):
     # Generate descriptive statistics HTML
     descrip_stats = series.describe()
     descrip_df = pd.DataFrame(descrip_stats).transpose()
-    descrip_html = descrip_df.to_html()
+    descrip_html = descrip_df.to_html(classes="table table-striped")
 
     value_counts = series.value_counts(ascending=False)
     value_counts_df = pd.DataFrame(value_counts).head(10)
-    value_counts_html = value_counts_df.to_html()
+    value_counts_html = value_counts_df.to_html(classes="table table-striped")
 
     # Generate the histogram
     # plt.figure(figsize=(8, 4))  # Optional, adjust size as needed
@@ -141,4 +142,7 @@ def superpower():
 @app.route('/shoes')
 def shoes():
     return render_count('shoes', horizontal=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 

@@ -5,6 +5,7 @@
 }
 
 .left-column {
+    margin-left: 0px;
     flex: 0 1 auto; /* As narrow as its content allows */
     padding-right: 20px; /* Space between columns */
 }
@@ -20,8 +21,10 @@ ul {
 }
 
 li {
+    border: 2px solid #219ebc;
+    border-radius: 8px;
     padding: 8px;
-    background-color: #f0f0f0;
+    background-color: #b5e2fa;
     margin-bottom: 4px;
 }
 
@@ -29,4 +32,18 @@ li {
     padding: 10px;
     background-color: #ffcccc;
     margin-bottom: 10px;
+}
+
+h1 {
+    text-align: center;
+    color: #023e8a;
+}
+
+.left-column li {
+    background-color: white;
+    border: none;
+}
+
+.btn btn-primary {
+    display: block;
 }

@@ -2,10 +2,11 @@
   <configuration default="false" name="Flask" type="Python.FlaskServer" nameIsGenerated="true">
     <module name="cs253_funsurvey" />
     <option name="target" value="app.py" />
+    <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SDK_HOME" value="C:\Program Files\Python311\python.exe" />
-    <option name="SDK_NAME" value="Python 3.11" />
+    <option name="SDK_HOME" value="D:\CS_Sophomore\CS253\Assignment\FlaskAssignment\flask-app-development-s24-SwikrutD\venv\Scripts\python.exe" />
+    <option name="SDK_NAME" value="Python 3.12 (flask-app-development-s24-SwikrutD)" />
     <option name="WORKING_DIRECTORY" value="" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />

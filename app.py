@@ -53,11 +53,11 @@ def render_count(col_label, horizontal=False):
     # Generate descriptive statistics HTML
     descrip_stats = series.describe()
     descrip_df = pd.DataFrame(descrip_stats).transpose()
-    descrip_html = descrip_df.to_html()
+    descrip_html = descrip_df.to_html(classes='table table-striped table-responsive')
 
     value_counts = series.value_counts(ascending=False)
     value_counts_df = pd.DataFrame(value_counts).head(10)
-    value_counts_html = value_counts_df.to_html()
+    value_counts_html = value_counts_df.to_html(classes='table table-striped table-responsive')
 
     # Generate the histogram
     # plt.figure(figsize=(8, 4))  # Optional, adjust size as needed

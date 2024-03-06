@@ -1,14 +1,3 @@
-.container {
-    display: flex;
-    flex-direction: row;
-    align-items: start; /* Ensures items are aligned at the top */
-}
-
-.left-column {
-    flex: 0 1 auto; /* As narrow as its content allows */
-    padding-right: 20px; /* Space between columns */
-}
-
 .page {
     flex: 1; /* Takes up the remaining space */
 }
